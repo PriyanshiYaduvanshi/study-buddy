@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🎓 Study Buddy — AI Learning Assistant
 
 A production-ready full-stack AI study app with concept explanations, note summarization, and quiz generation.
@@ -118,3 +119,7 @@ Visit **http://localhost:3000** 🎉
 3. **Quiz Generator** — Auto-generate 5 MCQs with scoring and explanations
 4. **Saved Notes** — Browse, search, and manage all saved summaries
 5. **Notion-inspired UI** — Clean, warm, minimal design with Fraunces + Instrument Sans fonts
+=======
+# study-buddy
+AI-Powered Study Buddy Web App
+>>>>>>> 030c496d610a9a6eea4356407533e75e602fb273
