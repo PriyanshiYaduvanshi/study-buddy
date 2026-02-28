@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const SESSION_KEY = 'study-buddy-session';
 
+// eslint-disable-next-line no-unused-vars
 const getSession = () => {
   let id = localStorage.getItem(SESSION_KEY);
   if (!id) { id = uuidv4(); localStorage.setItem(SESSION_KEY, id); }

@@ -3,8 +3,6 @@ import ReactMarkdown from 'react-markdown';
 import { BookOpen, Trash2, ChevronDown, ChevronUp, Search, Tag, Plus, X } from 'lucide-react';
 import LoadingDots from '../components/layout/LoadingDots';
 
-const NOTE_COLORS = ['#fdfcf8', '#eff6ff', '#f0f7f2', '#fdf2f5', '#fef3c7'];
-
 const NoteCard = ({ note, onDelete }) => {
   const [expanded, setExpanded] = useState(false);
 
