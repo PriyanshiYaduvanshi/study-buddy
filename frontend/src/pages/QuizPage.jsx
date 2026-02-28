@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, RotateCcw, CheckCircle, XCircle, ChevronRight } from 'lucide-react';
+import { Layers, Sparkles, RotateCcw, CheckCircle, XCircle, ChevronRight } from 'lucide-react';
 import { aiAPI } from '../utils/api';
 import LoadingDots from '../components/layout/LoadingDots';
 import toast from 'react-hot-toast';
