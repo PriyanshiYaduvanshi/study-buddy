@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-color: #fdfcf8;
+    color: #1a1714;
+    font-family: 'Instrument Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3 { font-family: 'Fraunces', serif; }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #d4cdc6; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #a89e93; }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-4 py-2.5 bg-ink-900 text-cream-50 rounded-lg text-sm font-medium
+           hover:bg-ink-700 active:scale-95 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-4 py-2.5 bg-cream-100 text-ink-700 border border-ink-100 rounded-lg text-sm font-medium
+           hover:bg-cream-200 hover:border-ink-300 active:scale-95 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 px-3 py-2 text-ink-500 rounded-lg text-sm font-medium
+           hover:bg-cream-100 hover:text-ink-900 active:scale-95 transition-all duration-150;
+  }
+
+  .card {
+    @apply bg-white rounded-xl border border-ink-100/70 shadow-card;
+  }
+
+  .input-base {
+    @apply w-full px-3.5 py-2.5 bg-white border border-ink-100 rounded-lg text-sm text-ink-900
+           placeholder:text-ink-300 focus:outline-none focus:ring-2 focus:ring-ink-900/10 focus:border-ink-300
+           transition-colors duration-150;
+  }
+
+  .textarea-base {
+    @apply w-full px-3.5 py-3 bg-white border border-ink-100 rounded-lg text-sm text-ink-900
+           placeholder:text-ink-300 focus:outline-none focus:ring-2 focus:ring-ink-900/10 focus:border-ink-300
+           transition-colors duration-150 resize-none leading-relaxed;
+  }
+
+  .section-label {
+    @apply text-xs font-medium uppercase tracking-widest text-ink-300 font-sans;
+  }
+
+  .tag {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cream-100 text-ink-500;
+  }
+}
+
+/* Prose styles for AI markdown output */
+.ai-prose p { margin: 0.5rem 0; line-height: 1.7; }
+.ai-prose ul { list-style: none; padding: 0; margin: 0.5rem 0; }
+.ai-prose ul li { position: relative; padding-left: 1.25rem; margin: 0.3rem 0; }
+.ai-prose ul li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: #a89e93;
+  font-size: 0.75rem;
+  top: 3px;
+}
+.ai-prose strong { color: #1a1714; font-weight: 600; }
+.ai-prose code {
+  background: #f4ede0;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8em;
+}
