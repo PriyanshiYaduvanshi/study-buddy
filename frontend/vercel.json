@@ -1,8 +1,4 @@
 {
-  "buildCommand": "npx --yes react-scripts build",
-  "outputDirectory": "build",
-  "installCommand": "npm install",
-  "framework": "create-react-app",
   "rewrites": [
     {
       "source": "/(.*)",
