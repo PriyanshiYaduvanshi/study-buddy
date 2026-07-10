@@ -9,7 +9,7 @@ const app = express();
 app.use(cors({
   origin: [
     'http://localhost:3000',
-    'https://study-buddy-qmqx.vercel.app',
+    'https://study-buddy-iota-five.vercel.app/',
     /\.vercel\.app$/
   ],
   credentials: true
