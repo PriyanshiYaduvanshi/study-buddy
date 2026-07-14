@@ -69,13 +69,37 @@ Use markdown formatting (bold for important terms).`;
 });
 
 // POST /api/ai/quiz
+const VALID_DIFFICULTIES = ['easy', 'medium', 'hard'];
+const MIN_QUESTIONS = 1;
+const MAX_QUESTIONS = 50;
+
+const difficultyGuidance = {
+  easy: 'Keep questions beginner-friendly — test recall of core definitions and basic concepts. Avoid tricky wording.',
+  medium: 'Test applied understanding — questions should require connecting two or more concepts, not just recall.',
+  hard: 'Make questions genuinely challenging — edge cases, subtle distinctions, multi-step reasoning, or comparing closely related concepts.',
+};
+
 router.post('/quiz', async (req, res) => {
   try {
-    const { text } = req.body;
-    if (!text) return res.status(400).json({ error: 'text is required' });
+    const { topic, numQuestions, difficulty } = req.body;
 
-    const system = `You are a quiz generator. Based on the provided study material, generate exactly 5
-multiple-choice questions to test understanding.
+    // Validation — mirrors the frontend's checks so the API is safe even if called directly.
+    if (!topic || !topic.trim()) {
+      return res.status(400).json({ error: 'Topic is required' });
+    }
+
+    const count = Number(numQuestions);
+    if (!Number.isInteger(count) || count < MIN_QUESTIONS || count > MAX_QUESTIONS) {
+      return res.status(400).json({ error: `Number of questions must be between ${MIN_QUESTIONS} and ${MAX_QUESTIONS}` });
+    }
+
+    const level = (difficulty || '').toLowerCase();
+    if (!VALID_DIFFICULTIES.includes(level)) {
+      return res.status(400).json({ error: 'Difficulty must be one of: easy, medium, hard' });
+    }
+
+    const system = `You are a quiz generator. Create exactly ${count} multiple-choice questions on the topic "${topic.trim()}"
+at a ${level.toUpperCase()} difficulty level. ${difficultyGuidance[level]}
 Return ONLY valid JSON in this exact format (no markdown, no extra text):
 {
   "questions": [
@@ -87,13 +111,22 @@ Return ONLY valid JSON in this exact format (no markdown, no extra text):
       "explanation": "Brief explanation of why this is correct"
     }
   ]
-}`;
+}
+The "questions" array must contain exactly ${count} items, numbered 1 to ${count}.`;
 
-    const response = await chat(system, `Generate a quiz from this study material:\n\n${text}`, 0.6);
+    // Roughly ~110 tokens per question (question + 4 options + explanation) plus headroom.
+    const maxTokens = Math.min(8000, 800 + count * 130);
+
+    const response = await chat(system, `Generate the quiz now: topic="${topic.trim()}", questions=${count}, difficulty=${level}.`, 0.6, maxTokens);
     const jsonMatch = response.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error('AI did not return valid JSON — try again');
     const quizData = JSON.parse(jsonMatch[0]);
-    res.json(quizData);
+
+    if (!Array.isArray(quizData.questions) || quizData.questions.length === 0) {
+      throw new Error('AI did not return any questions — try again');
+    }
+
+    res.json({ ...quizData, topic: topic.trim(), difficulty: level });
   } catch (err) {
     logError('/quiz', err);
     res.status(500).json({ error: err.message || 'Failed to generate quiz' });

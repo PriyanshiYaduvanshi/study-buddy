@@ -1,27 +1,66 @@
 import React, { useState } from 'react';
-import { Layers, Sparkles, RotateCcw, CheckCircle, XCircle, ChevronRight } from 'lucide-react';
+import { Layers, Sparkles, RotateCcw, CheckCircle, XCircle, ChevronRight, AlertCircle } from 'lucide-react';
 import { aiAPI } from '../utils/api';
 import LoadingDots from '../components/layout/LoadingDots';
 import toast from 'react-hot-toast';
 
+const QUESTION_OPTIONS = [5, 10, 15, 20, 25, 30];
+const MIN_QUESTIONS = 1;
+const MAX_QUESTIONS = 50;
+
+const DIFFICULTIES = [
+  { value: 'easy', label: 'Easy', color: 'bg-sage-light text-sage-accent border-sage-accent/30' },
+  { value: 'medium', label: 'Medium', color: 'bg-amber-light text-amber-accent border-amber-mid/30' },
+  { value: 'hard', label: 'Hard', color: 'bg-rose-light text-rose-accent border-rose-accent/30' },
+];
+
 const QuizPage = () => {
-  const [text, setText] = useState('');
+  const [topic, setTopic] = useState('');
+  const [numQuestions, setNumQuestions] = useState(10);
+  const [customCount, setCustomCount] = useState('');
+  const [useCustomCount, setUseCustomCount] = useState(false);
+  const [difficulty, setDifficulty] = useState(null);
+  const [errors, setErrors] = useState({});
+
   const [quiz, setQuiz] = useState(null);
   const [loading, setLoading] = useState(false);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
 
+  const effectiveCount = useCustomCount ? Number(customCount) : numQuestions;
+
+  const validate = () => {
+    const next = {};
+    if (!topic.trim()) next.topic = 'Please enter a topic to quiz yourself on';
+
+    if (useCustomCount) {
+      const n = Number(customCount);
+      if (!customCount || !Number.isInteger(n) || n < MIN_QUESTIONS || n > MAX_QUESTIONS) {
+        next.count = `Enter a number between ${MIN_QUESTIONS} and ${MAX_QUESTIONS}`;
+      }
+    } else if (!numQuestions) {
+      next.count = 'Please select the number of questions';
+    }
+
+    if (!difficulty) next.difficulty = 'Please select a difficulty level';
+
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
   const generateQuiz = async () => {
-    if (!text.trim() || loading) return;
+    if (loading) return;
+    if (!validate()) return;
+
     setLoading(true);
     setQuiz(null);
     setAnswers({});
     setSubmitted(false);
     try {
-      const { data } = await aiAPI.quiz(text);
+      const { data } = await aiAPI.quiz(topic.trim(), effectiveCount, difficulty);
       setQuiz(data);
-    } catch {
-      toast.error('Failed to generate quiz. Check your API key.');
+    } catch (err) {
+      toast.error(err?.response?.data?.error || 'Failed to generate quiz. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -43,38 +82,129 @@ const QuizPage = () => {
   const score = submitted
     ? quiz.questions.filter((q) => answers[q.id] === q.correctAnswer).length
     : 0;
+  const total = quiz?.questions?.length || 0;
+  const scoreRatio = total ? score / total : 0;
 
-  const reset = () => { setQuiz(null); setAnswers({}); setSubmitted(false); setText(''); };
+  const reset = () => {
+    setQuiz(null);
+    setAnswers({});
+    setSubmitted(false);
+    setTopic('');
+    setDifficulty(null);
+    setUseCustomCount(false);
+    setCustomCount('');
+    setNumQuestions(10);
+    setErrors({});
+  };
 
   return (
     <div className="p-8 w-full animate-fade-in">
       {!quiz ? (
-        <div className="space-y-4">
+        <div className="space-y-5 max-w-xl">
+          {/* Topic */}
           <div>
-            <label className="section-label block mb-2">Study Material</label>
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Paste your study notes, chapter summary, or any topic text here…"
-              className="textarea-base"
-              rows={10}
+            <label className="section-label block mb-2">Quiz Topic</label>
+            <input
+              type="text"
+              value={topic}
+              onChange={(e) => { setTopic(e.target.value); if (errors.topic) setErrors((er) => ({ ...er, topic: undefined })); }}
+              placeholder="e.g. Java, Operating Systems, Machine Learning…"
+              className={`input-base ${errors.topic ? 'border-rose-accent focus:ring-rose-accent/10' : ''}`}
             />
+            {errors.topic && (
+              <p className="mt-1.5 text-xs text-rose-accent flex items-center gap-1">
+                <AlertCircle size={12} /> {errors.topic}
+              </p>
+            )}
           </div>
-          <button onClick={generateQuiz} disabled={!text.trim() || loading} className="btn-primary w-full py-3">
+
+          {/* Number of questions */}
+          <div>
+            <label className="section-label block mb-2">Number of Questions</label>
+            <div className="flex flex-wrap gap-2">
+              {QUESTION_OPTIONS.map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => { setUseCustomCount(false); setNumQuestions(n); if (errors.count) setErrors((er) => ({ ...er, count: undefined })); }}
+                  className={`px-3.5 py-2 rounded-lg border text-sm font-medium transition-all duration-150 ${
+                    !useCustomCount && numQuestions === n
+                      ? 'bg-ink-900 border-ink-900 text-cream-50'
+                      : 'bg-cream-50 border-ink-100 text-ink-700 hover:border-ink-300'
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => { setUseCustomCount(true); if (errors.count) setErrors((er) => ({ ...er, count: undefined })); }}
+                className={`px-3.5 py-2 rounded-lg border text-sm font-medium transition-all duration-150 ${
+                  useCustomCount
+                    ? 'bg-ink-900 border-ink-900 text-cream-50'
+                    : 'bg-cream-50 border-ink-100 text-ink-700 hover:border-ink-300'
+                }`}
+              >
+                Custom
+              </button>
+            </div>
+            {useCustomCount && (
+              <input
+                type="number"
+                min={MIN_QUESTIONS}
+                max={MAX_QUESTIONS}
+                value={customCount}
+                onChange={(e) => { setCustomCount(e.target.value); if (errors.count) setErrors((er) => ({ ...er, count: undefined })); }}
+                placeholder={`${MIN_QUESTIONS}–${MAX_QUESTIONS}`}
+                className={`input-base mt-2.5 max-w-[140px] ${errors.count ? 'border-rose-accent focus:ring-rose-accent/10' : ''}`}
+              />
+            )}
+            {errors.count && (
+              <p className="mt-1.5 text-xs text-rose-accent flex items-center gap-1">
+                <AlertCircle size={12} /> {errors.count}
+              </p>
+            )}
+          </div>
+
+          {/* Difficulty */}
+          <div>
+            <label className="section-label block mb-2">Difficulty Level</label>
+            <div className="flex flex-wrap gap-2">
+              {DIFFICULTIES.map(({ value, label, color }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => { setDifficulty(value); if (errors.difficulty) setErrors((er) => ({ ...er, difficulty: undefined })); }}
+                  className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all duration-150 ${
+                    difficulty === value ? color : 'bg-cream-50 border-ink-100 text-ink-700 hover:border-ink-300'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            {errors.difficulty && (
+              <p className="mt-1.5 text-xs text-rose-accent flex items-center gap-1">
+                <AlertCircle size={12} /> {errors.difficulty}
+              </p>
+            )}
+          </div>
+
+          <button onClick={generateQuiz} disabled={loading} className="btn-primary w-full py-3">
             {loading ? (
               <LoadingDots size="sm" label="Generating questions..." />
             ) : (
               <>
                 <Sparkles size={15} />
-                Generate 5 Quiz Questions
+                Generate Quiz
               </>
             )}
           </button>
 
           <div className="p-4 rounded-xl bg-rose-light border border-rose-accent/10">
             <p className="text-xs text-ink-600 leading-relaxed">
-              <strong className="text-ink-800">🎯 How it works:</strong> The AI reads your notes and creates 5 
-              multiple-choice questions that test your understanding of the core concepts.
+              <strong className="text-ink-800">🎯 How it works:</strong> Pick a topic, how many questions you want,
+              and a difficulty — the AI builds a multiple-choice quiz to match, with explanations for every answer.
             </p>
           </div>
         </div>
@@ -83,15 +213,15 @@ const QuizPage = () => {
           {/* Score banner (after submit) */}
           {submitted && (
             <div className={`p-4 rounded-xl flex items-center justify-between ${
-              score >= 4 ? 'bg-sage-light border border-sage-accent/20' :
-              score >= 2 ? 'bg-amber-light border border-amber-mid/20' :
+              scoreRatio >= 0.8 ? 'bg-sage-light border border-sage-accent/20' :
+              scoreRatio >= 0.4 ? 'bg-amber-light border border-amber-mid/20' :
               'bg-rose-light border border-rose-accent/20'
             }`}>
               <div>
-                <p className="font-display text-2xl font-semibold text-ink-900">{score}/5</p>
+                <p className="font-display text-2xl font-semibold text-ink-900">{score}/{total}</p>
                 <p className="text-xs text-ink-500 mt-0.5">
-                  {score === 5 ? '🎉 Perfect score! You nailed it!' :
-                   score >= 3 ? '👏 Good job! Keep studying the rest.' :
+                  {scoreRatio === 1 ? '🎉 Perfect score! You nailed it!' :
+                   scoreRatio >= 0.6 ? '👏 Good job! Keep studying the rest.' :
                    '📚 Keep practicing — review the explanations below.'}
                 </p>
               </div>

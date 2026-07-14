@@ -7,12 +7,14 @@ const MODEL = 'llama-3.1-8b-instant';
 
 /**
  * Single-turn: system prompt + one user message → string reply
+ * maxTokens defaults to 1024, but callers generating longer output (e.g. large quizzes)
+ * can request more room.
  */
-const chat = async (systemPrompt, userMessage, temperature = 0.7) => {
+const chat = async (systemPrompt, userMessage, temperature = 0.7, maxTokens = 1024) => {
   const completion = await groq.chat.completions.create({
     model: MODEL,
     temperature,
-    max_tokens: 1024,
+    max_tokens: maxTokens,
     messages: [
       { role: 'system', content: systemPrompt },
       { role: 'user',   content: userMessage  },

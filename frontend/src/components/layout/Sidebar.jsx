@@ -1,8 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import {
   BookOpen, MessageSquare, FileText, Layers,
-  Sparkles, ChevronRight, GraduationCap
+  Sparkles, ChevronRight, GraduationCap, LogOut
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const navItems = [
   { id: 'home', label: 'Home', icon: Sparkles },
@@ -13,6 +16,25 @@ const navItems = [
 ];
 
 const Sidebar = ({ activePage, onNavigate, noteCount = 0 }) => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/', { replace: true });
+    } catch (err) {
+      toast.error('Could not log out. Please try again.');
+    }
+  };
+
+  const initials = (user?.displayName || user?.email || '?')
+    .split(' ')
+    .map((s) => s[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+
   return (
     <aside className="w-60 shrink-0 h-screen sticky top-0 flex flex-col bg-cream-50 shadow-sidebar border-r border-ink-100/50">
       {/* Logo */}
@@ -61,9 +83,31 @@ const Sidebar = ({ activePage, onNavigate, noteCount = 0 }) => {
       </nav>
 
       {/* Bottom tip */}
-      <div className="m-3 p-3 rounded-lg bg-amber-light border border-amber-mid/20">
+      <div className="mx-3 mt-3 p-3 rounded-lg bg-amber-light border border-amber-mid/20">
         <p className="text-xs text-ink-700 font-medium mb-0.5">💡 Pro Tip</p>
         <p className="text-xs text-ink-500 leading-relaxed">Paste your notes in Summarizer, then generate a quiz to test yourself!</p>
+      </div>
+
+      {/* User profile + logout */}
+      <div className="m-3 mt-3 pt-3 border-t border-ink-100/50 flex items-center gap-2.5">
+        {user?.photoURL ? (
+          <img src={user.photoURL} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" referrerPolicy="no-referrer" />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-ink-900 text-cream-50 text-xs font-medium flex items-center justify-center shrink-0">
+            {initials}
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-medium text-ink-900 truncate">{user?.displayName || 'Student'}</p>
+          <p className="text-[10px] text-ink-300 truncate">{user?.email}</p>
+        </div>
+        <button
+          onClick={handleLogout}
+          aria-label="Log out"
+          className="p-1.5 rounded-md text-ink-300 hover:text-rose-accent hover:bg-rose-light shrink-0"
+        >
+          <LogOut size={14} />
+        </button>
       </div>
     </aside>
   );
