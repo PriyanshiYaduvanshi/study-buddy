@@ -10,6 +10,7 @@ backend/node_modules/
 .env.local
 .env.production
 backend/.env
+backend/firebase-service-account.json
 frontend/.env
 frontend/.env.production
 frontend/.env.local
