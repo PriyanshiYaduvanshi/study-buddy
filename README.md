@@ -19,7 +19,7 @@ A production-ready full-stack AI study app with a marketing landing page, full a
 5. **Forgot Password** — Firebase-powered password reset email
 6. **Explain** — Chat interface with ELI5-style explanations
 7. **Summarizer** — Paste notes → get structured bullet-point summary
-8. **Quiz Generator** — Auto-generate 5 MCQs with scoring and explanations
+8. **Quiz Generator** — Generate custom MCQs (choose topic, number of questions, and difficulty) with scoring and explanations
 9. **Saved Notes** — Browse, search, and manage all saved summaries
 10. **Notion-inspired UI** — Clean, warm, minimal design, consistent across marketing and app pages
 
@@ -33,7 +33,7 @@ A production-ready full-stack AI study app with a marketing landing page, full a
 | **Auth** | Firebase Authentication (Email/Password + Google), firebase-admin (backend token verification) |
 | **Backend** | Node.js, Express 4 |
 | **Database** | MongoDB with Mongoose |
-| **AI Model** | Groq API — Llama 3.1 8B Instant |
+| **AI Model** | Groq API — OpenAI GPT-OSS 20B |
 | **Deployment** | Vercel + Render + MongoDB Atlas |
 
 ---
@@ -188,7 +188,7 @@ Visit `http://localhost:3000` → Landing page → **Get started** → register 
 | `GET` | `/api/ai/test` | – | Test Groq API key |
 | `POST` | `/api/ai/explain` | – | ELI5 concept explanation |
 | `POST` | `/api/ai/summarize` | – | Bullet-point summary |
-| `POST` | `/api/ai/quiz` | – | Generate 5 MCQs |
+| `POST` | `/api/ai/quiz` | – | Generate custom MCQs (topic, question count, and difficulty) |
 | `GET` | `/api/notes` | – | List all notes |
 | `POST` | `/api/notes` | – | Create a note |
 | `PUT` | `/api/notes/:id` | – | Update a note |
@@ -288,7 +288,7 @@ Department of Computer Science & Engineering
 
 - [AICTE](https://aicte-india.org/) & [Edunet Foundation](https://edunetfoundation.org/) — Internship Program
 - [Groq](https://groq.com/) — Free AI inference API
-- [Meta AI](https://ai.meta.com/) — Llama 3.1 open-source model
+- [OpenAI](https://openai.com/) — GPT-OSS 20B open-weight model
 - [Firebase](https://firebase.google.com/) — Authentication
 - [Vercel](https://vercel.com/) — Frontend deployment
 - [Render](https://render.com/) — Backend deployment
