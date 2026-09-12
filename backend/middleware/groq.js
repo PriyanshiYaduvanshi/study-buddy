@@ -3,7 +3,7 @@ const Groq = require('groq-sdk');
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 // Fast, capable, free model on Groq
-const MODEL = 'llama-3.1-8b-instant';
+const MODEL = 'openai/gpt-oss-20b';
 
 /**
  * Single-turn: system prompt + one user message → string reply
