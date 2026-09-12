@@ -30,3 +30,4 @@ Thumbs.db
 # Cache
 frontend/node_modules/.cache/
 .cache/
+backend/firebase-service-account.json
